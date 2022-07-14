@@ -54,8 +54,45 @@ public class OffMeshLinkClimb : MonoBehaviour
 
 
     // Update is called once per frame
-    void Update()
+private IEnumerator ClimbOrDescend()
     {
-        
+
+        //stop moving with navMeshAgent
+        navMeshAgent.isStopped = true;
+
+
+        //current position's offMeshLink's start/end point
+        OffMeshLinkData linkData = navMeshAgent.currentOffMeshLinkData;
+        Vector3 start = linkData.startPos;
+        Vector3 end = linkData.endPos;
+
+
+        //time for climbing up/down
+        float climbTime = Mathf.Abs(end.y - start.y) / climbSpeed;
+        float currentTime = 0.0f;
+        float percent = 0.0f;
+
+
+
+        while (percent <1)
+            {
+            //Time.deltaTime will make PERCENT= 1 after 1 SECOND
+            // so use climbTime variable to control time
+            currentTime += Time.deltaTime;
+            percent = currentTime / climbTime;
+
+
+            //after time(max 1 second) change object's position
+            transform.position = Vector3.Lerp(start, end, percent);
+
+            yield return null;
+        }
+
+        //finished moving using OFFMESHLINK
+        navMeshAgent.CompleteOffMeshLink();
+
+        //After OFFMESHLINK is done, reuse navigation to move. 
+        navMeshAgent.isStopped = false;
+
     }
 }
